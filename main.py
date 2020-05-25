@@ -20,8 +20,7 @@ def index():
 @app.route("/github/login")
 def github_login():
     github = OAuth2Session(os.environ.get("GITHUB_CLIENT_ID"))
-    authorization_url, state = github.authorization_url(
-        "https://github.com/login/oauth/authorize")
+    authorization_url, state = github.authorization_url("https://github.com/login/oauth/authorize")
 
     response = make_response(redirect(authorization_url))
     response.set_cookie("oauth_state", state, httponly=True)
@@ -36,7 +35,7 @@ def github_callback():
                                client_secret=os.environ.get("GITHUB_CLIENT_SECRET"),
                                authorization_response=request.url)
 
-    response = make_response(redirect(url_for('profile')))
+    response = make_response(redirect(url_for("profile")))
     response.set_cookie("oauth_token", json.dumps(token), httponly=True)
 
     return response
@@ -45,18 +44,18 @@ def github_callback():
 @app.route("/profile")
 def profile():
     github = OAuth2Session(os.environ.get("GITHUB_CLIENT_ID"), token=json.loads(request.cookies.get("oauth_token")))
-    github_profile_data = github.get('https://api.github.com/user').json()
+    github_profile_data = github.get("https://api.github.com/user").json()
 
     return render_template("profile.html", github_profile_data=github_profile_data)
 
 
 @app.route("/github/logout")
 def logout():
-    response = make_response(redirect(url_for('index')))
+    response = make_response(redirect(url_for("index")))
     response.set_cookie("oauth_token", expires=0)
 
     return response
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run()
